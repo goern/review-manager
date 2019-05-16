@@ -24,18 +24,8 @@ import pytest
 import review_manager
 
 
-def test_metrics(client):
-    """Let's see if we have some metrics."""
-
-    r = client.get("/metrics")
-    assert f'app_info{{version="{review_manager.__version__}"}} 1.0' in str(r.data)
-
-
 def test_index(client):
     """Get the banner and done..."""
 
     r = client.get("/")
-    assert (
-        f"This is Review Manager, {review_manager.__version__}. Humans! Go away!"
-        in str(r.data)
-    )
+    assert f"This is Review Manager, {review_manager.__version__}. Humans! Go away!" in str(r.data)

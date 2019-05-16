@@ -34,15 +34,32 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 from review_manager import create_app, __version__
 
+
+DEBUG = bool(os.getenv("DEBUG", False))
+
+
+daiquiri.setup(level=logging.INFO)
+logger = daiquiri.getLogger("label_checker")
+
+if DEBUG:
+    logger.setLevel(level=logging.DEBUG)
+else:
+    logger.setLevel(level=logging.INFO)
+
+
 app = create_app()
-
-registry = CollectorRegistry()
-multiprocess.MultiProcessCollector(registry, path="/tmp")
-metrics = PrometheusMetrics(app, registry=registry)
-
-metrics.info("app_info", "Review Manager info", version=f"v{__version__}")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    logger.info(f"Review Manager v{__version__}")
+    logger.debug("... and I am running in DEBUG mode!")
+
+    registry = CollectorRegistry()
+    multiprocess.MultiProcessCollector(registry, path="/tmp")
+    metrics = PrometheusMetrics(app, registry=registry)
+
+    metrics.info("app_info", "Review Manager info", version=f"v{__version__}")
+
+    # TODO figure out why prometheus metrics are not exported if we run with DEBUG=1
+    app.run(host="0.0.0.0", port=8080, debug=DEBUG)
 
