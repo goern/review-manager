@@ -19,30 +19,13 @@
 """The Review Manager will manage the review process of Pull Requests on GitHub."""
 
 
-import os
-import logging
-import hmac
+import pytest
 
-import daiquiri
+import review_manager
 
 
-from flask import Flask, current_app, send_from_directory, jsonify, request
+@pytest.fixture
+def client():
+    client = review_manager.create_app().test_client()
 
-from prometheus_client import multiprocess
-from prometheus_client.core import CollectorRegistry
-from prometheus_flask_exporter import PrometheusMetrics
-
-from review_manager import create_app, __version__
-
-app = create_app()
-
-registry = CollectorRegistry()
-multiprocess.MultiProcessCollector(registry, path="/tmp")
-metrics = PrometheusMetrics(app, registry=registry)
-
-metrics.info("app_info", "Review Manager info", version=f"v{__version__}")
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
-
+    yield client

@@ -19,30 +19,23 @@
 """The Review Manager will manage the review process of Pull Requests on GitHub."""
 
 
-import os
-import logging
-import hmac
+import pytest
 
-import daiquiri
+import review_manager
 
 
-from flask import Flask, current_app, send_from_directory, jsonify, request
+def test_metrics(client):
+    """Let's see if we have some metrics."""
 
-from prometheus_client import multiprocess
-from prometheus_client.core import CollectorRegistry
-from prometheus_flask_exporter import PrometheusMetrics
-
-from review_manager import create_app, __version__
-
-app = create_app()
-
-registry = CollectorRegistry()
-multiprocess.MultiProcessCollector(registry, path="/tmp")
-metrics = PrometheusMetrics(app, registry=registry)
-
-metrics.info("app_info", "Review Manager info", version=f"v{__version__}")
+    r = client.get("/metrics")
+    assert f'app_info{{version="{review_manager.__version__}"}} 1.0' in str(r.data)
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+def test_index(client):
+    """Get the banner and done..."""
 
+    r = client.get("/")
+    assert (
+        f"This is Review Manager, {review_manager.__version__}. Humans! Go away!"
+        in str(r.data)
+    )

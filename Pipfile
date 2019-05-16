@@ -8,6 +8,8 @@ coala = "*"
 coala-bears = "*"
 black = "*"
 pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [packages]
 flask = "*"
